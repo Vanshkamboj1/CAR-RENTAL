@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Background from '../assets/images/Background.png';
+import Background from '../assets/Images/Background.png';
 import AdminCarCard from '../Components/AdminCarCard.jsx';
 
 function LandingPage() {

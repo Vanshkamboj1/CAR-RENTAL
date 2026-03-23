@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Background from '../assets/images/Background.png';
+import Background from '../assets/Images/Background.png';
 
 export default function AdminBookings() {
   const [bookings, setBookings] = useState([]);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Background from '../assets/images/Background.png';
+import Background from '../assets/Images/Background.png';
 
 const Booking = () => {
   const location = useLocation();

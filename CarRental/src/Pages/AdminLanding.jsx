@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Background from '../assets/images/Background.png';
+import Background from '../assets/Images/Background.png';
 
 export default function AdminLandingPage() {
   const [step, setStep] = useState(1);

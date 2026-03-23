@@ -1,5 +1,5 @@
 import React from "react";
-import Background from "../assets/images/Background.png";
+import Background from "../assets/Images/Background.png";
 
 function AboutUs() {
   const sectionStyle = {
