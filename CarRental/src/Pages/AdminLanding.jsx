@@ -24,7 +24,7 @@ export default function AdminLandingPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('http://localhost:8080/api/admin/upload-image', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/upload-image`, {
         method: 'POST',
         body: formData
       });
@@ -62,7 +62,7 @@ export default function AdminLandingPage() {
     };
 
     try {
-      const res = await fetch('http://localhost:8080/api/admin/cars', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/cars`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalCarData)

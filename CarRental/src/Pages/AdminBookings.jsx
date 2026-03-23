@@ -9,7 +9,7 @@ export default function AdminBookings() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/admin/bookings');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/bookings`);
         if (!response.ok) throw new Error('Failed to fetch bookings');
         const data = await response.json();
         console.log('Fetched bookings:', data);

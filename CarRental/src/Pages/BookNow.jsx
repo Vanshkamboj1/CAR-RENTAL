@@ -11,7 +11,7 @@ const BookNow = () => {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/cars/available');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/cars/available`);
         const allCars = response.data;
 
         // ❌ Exclude cars whose location contains "india" (case-insensitive)

@@ -16,7 +16,7 @@ export default function MakeAvailable() {
     setMessage('');
 
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/cars/${carId}/available`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/cars/${carId}/available`, {
         method: 'PATCH',
       });
 
