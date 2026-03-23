@@ -56,6 +56,7 @@ npm start
 
 
 4️⃣ Database Setup
+
 Use PostgreSQL (or Neon DB if deployed)
 
 Create a database and update DB_URL accordingly
