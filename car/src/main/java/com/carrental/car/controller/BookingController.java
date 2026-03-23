@@ -32,8 +32,7 @@ public class BookingController {
             Booking newBooking = bookingService.createBooking(carId, bookingDetails);
             return new ResponseEntity<>(newBooking, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            // This will catch errors like "Car not found" or "Car is not available"
-            // and send a "400 Bad Request" to the frontend.
+
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
