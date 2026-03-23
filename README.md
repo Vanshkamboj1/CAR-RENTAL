@@ -20,51 +20,47 @@ It uses Spring Boot for the backend, React + Tailwind CSS for the frontend, Post
 | **Tools**          | IntelliJ IDEA (backend), VS Code (frontend) |
 
 
-🗄️ Database Setup (PostgreSQL)
-Open pgAdmin 4.
-Create a new database named:carental
-Update credentials in
+🚀 Setup Instructions:-
+
+1️⃣ Clone the Repository
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+
+2️⃣ Backend Setup (Spring Boot) (Folder - Car)
+Install Dependencies
+
+Make sure you have:
+Java 17+
+Maven
+
+Configure Environment Variables:
+Create a .env file in the backend root directory:
+
+    DB_URL=your_database_url
+    JWT=your_secret_key
+    CLOUDINARY_URL=your_cloudinary_url
+
+Run Backend
+mvn spring-boot:run
 
 
-    car/src/main/resources/application.properties:
+3️⃣ Frontend Setup (Folder - CarRental)
+Install Dependencies
+cd CarRental
+npm install
+npm start
 
-    spring.datasource.url=jdbc:postgresql://localhost:5432/carental
-    spring.datasource.username=YOUR_USERNAME
-    spring.datasource.password=YOUR_PASSWORD
-    spring.jpa.hibernate.ddl-auto=update
-    spring.jpa.show-sql=true
 
-☁️ Cloudinary Configuration
+4️⃣ Database Setup
+Use PostgreSQL (or Neon DB if deployed)
+Create a database and update DB_URL accordingly
 
-Update the following values in your application.properties file with your Cloudinary credentials:
-
-cloudinary.url=cloudinary://<api_key>:<api_secret>@<cloud_name>
-
+Example:
+jdbc:postgresql://localhost:5432/car_rental
 
 
 ⚠️ Important: Never commit your real API keys or passwords to GitHub.
 
-
-▶️ Running Instructions
-
-
-🧩 Backend (Spring Boot — IntelliJ IDEA)
-
-    Open the car folder in IntelliJ IDEA.
-
-    Allow Maven to build and resolve dependencies.
-
-    Run the main Spring Boot application file (CarApplication.java).
-
-    Once running successfully, the backend will start on:http://localhost:8080
-
-💻 Frontend (React — VS Code)
-
-    Open the CarRental folder in VS Code.
-
-    Install dependencies:npm install
-    Start the frontend:npm start
-    The frontend will launch automatically at:http://localhost:5173
 
 📸 Screenshots
 ⚙️ Backend Running in IntelliJ IDEA
