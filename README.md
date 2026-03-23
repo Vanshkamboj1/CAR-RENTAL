@@ -23,15 +23,15 @@ It uses Spring Boot for the backend, React + Tailwind CSS for the frontend, Post
 🚀 Setup Instructions:-
 
 1️⃣ Clone the Repository
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/Vanshkamboj1/CAR-RENTAL
+
 cd your-repo-name
 
 2️⃣ Backend Setup (Spring Boot) (Folder - Car)
 Install Dependencies
 
 Make sure you have:
-Java 17+
-Maven
+Java 17+,Maven
 
 Configure Environment Variables:
 Create a .env file in the backend root directory:
@@ -41,18 +41,23 @@ Create a .env file in the backend root directory:
     CLOUDINARY_URL=your_cloudinary_url
 
 Run Backend
+
 mvn spring-boot:run
 
 
 3️⃣ Frontend Setup (Folder - CarRental)
 Install Dependencies
+
 cd CarRental
+
 npm install
+
 npm start
 
 
 4️⃣ Database Setup
 Use PostgreSQL (or Neon DB if deployed)
+
 Create a database and update DB_URL accordingly
 
 Example:
