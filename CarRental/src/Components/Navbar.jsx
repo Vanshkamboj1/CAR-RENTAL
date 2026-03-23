@@ -6,10 +6,8 @@ function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear any session or local storage data if needed
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate('/');
+    localStorage.removeItem('authToken'); // remove only the JWT
+    navigate('/'); // redirect to login page
   };
 
   return (

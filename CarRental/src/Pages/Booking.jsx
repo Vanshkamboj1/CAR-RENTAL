@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Background from '../assets/Images/Background.png';
 
 const Booking = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { car } = location.state || {};
 
   const [formData, setFormData] = useState({
@@ -15,15 +16,32 @@ const Booking = () => {
   });
 
   const [totalPrice, setTotalPrice] = useState(0);
+  const [message, setMessage] = useState({ text: '', type: '' }); // ✅ success/error message state
 
-  // Auto-calculate total price based on selected dates
+  const token = localStorage.getItem('authToken');
+
+  useEffect(() => {
+    if (!token) {
+      setMessage({ text: '⚠️ Please login before booking.', type: 'error' });
+      setTimeout(() => navigate('/login'), 1500);
+    }
+  }, [token, navigate]);
+
+  // ✅ Auto-calculate total price
   useEffect(() => {
     if (formData.startDate && formData.endDate) {
       const start = new Date(formData.startDate);
       const end = new Date(formData.endDate);
+
+      // Ensure valid range
+      if (end < start) {
+        setTotalPrice(0);
+        return;
+      }
+
       const diffTime = end - start;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      setTotalPrice(diffDays > 0 ? diffDays * car.price : 0);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // ✅ inclusive of same-day
+      setTotalPrice(diffDays * (car?.price || 0));
     } else {
       setTotalPrice(0);
     }
@@ -35,9 +53,22 @@ const Booking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage({ text: '', type: '' });
 
     if (!car || !car.id) {
-      alert('Car information missing!');
+      setMessage({ text: 'Car information missing!', type: 'error' });
+      return;
+    }
+
+    if (!formData.startDate || !formData.endDate) {
+      setMessage({ text: 'Please select both start and end dates.', type: 'error' });
+      return;
+    }
+
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+    if (end < start) {
+      setMessage({ text: 'End date cannot be before start date.', type: 'error' });
       return;
     }
 
@@ -54,16 +85,20 @@ const Booking = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/car/${car.id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(bookingData),
       });
 
       if (response.ok) {
-        alert(
-          `✅ Booking confirmed for ${car.name}!\n` +
-          `Car ID: ${car.id}\n` +
-          `Total Price: ₹${totalPrice}`
-        );
+        setMessage({
+          text: `✅ Booking confirmed for ${car.name}! Total Price: ₹${totalPrice}`,
+          type: 'success',
+        });
+
+        // Reset form after success
         setFormData({
           fullName: '',
           email: '',
@@ -72,17 +107,23 @@ const Booking = () => {
           endDate: '',
         });
         setTotalPrice(0);
+
+        // Optional: clear success message after a few seconds
+        setTimeout(() => setMessage({ text: '', type: '' }), 4000);
       } else {
         const err = await response.text();
-        alert('❌ Booking failed: ' + err);
+        setMessage({ text: '❌ Booking failed: ' + err, type: 'error' });
       }
     } catch (error) {
       console.error('Error submitting booking:', error);
-      alert('⚠️ Unable to connect to backend. Please check your server.');
+      setMessage({
+        text: '⚠️ Unable to connect to backend. Please check your server.',
+        type: 'error',
+      });
     }
   };
 
-  if (!car) return <p className="text-center mt-10">No car selected</p>;
+  if (!car) return <p className="text-center mt-10 text-white">No car selected</p>;
 
   const componentStyle = {
     backgroundImage: `url(${Background})`,
@@ -103,6 +144,19 @@ const Booking = () => {
         <h2 className="text-2xl font-bold mb-5 text-center">
           Book {car.name}
         </h2>
+
+        {/* ✅ Success / Error Message */}
+        {message.text && (
+          <div
+            className={`mb-4 p-3 rounded-lg text-center font-medium ${
+              message.type === 'success'
+                ? 'bg-green-100 text-green-700 border border-green-300'
+                : 'bg-red-100 text-red-700 border border-red-300'
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
 
         <div className="mb-3 text-gray-600">
           <p><strong>Car ID:</strong> {car.id}</p>

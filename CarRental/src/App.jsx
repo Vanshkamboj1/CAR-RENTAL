@@ -1,100 +1,65 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+
 import LoginPage from './Pages/LoginPage';
+import RegisterPage from './Pages/RegisterPage';
 import LandingPage from './Pages/LandingPage';
 import AboutUs from './Pages/AboutUs';
 import BookNow from './Pages/BookNow';
 import Booking from './Pages/Booking';
-import AdminLanding from './Pages/AdminLanding'; 
+import AdminLanding from './Pages/AdminLanding';
+import AdminBookings from './Pages/AdminBookings';
+import MakeAvailable from './Pages/MakeAvailable';
+
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 import AdminNavbar from './Components/ANavnbar';
-import AdminBookings from './Pages/AdminBookings';
-import MakeAvailable from './Pages/MakeAvailable';
+
+/* -------- Layouts -------- */
+
+const UserLayout = () => (
+  <>
+    <Navbar />
+    <Outlet />
+    <Footer />
+  </>
+);
+
+const AdminLayout = () => (
+  <>
+    <AdminNavbar />
+    <Outlet />
+  </>
+);
+
+/* -------- App -------- */
 
 const App = () => {
   return (
     <Router>
       <Routes>
 
-        {/* 🔹 Login Page (No Navbar or Footer) */}
+        {/* Auth */}
         <Route path="/" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-        {/* 🔹 User Routes */}
-        <Route
-          path="/user"
-          element={
-            <>
-              <Navbar />
-              <LandingPage />
-              <Footer />
-            </>
-          }
-        />
+        {/* User Routes */}
+        <Route path="/user" element={<UserLayout />}>
+          <Route index element={<LandingPage />} />
+          <Route path="about" element={<AboutUs />} />
+          <Route path="booknow" element={<BookNow />} />
+          <Route path="booking/:id" element={<Booking />} />
+        </Route>
 
-        <Route
-          path="/user/about"
-          element={
-            <>
-              <Navbar />
-              <AboutUs />
-              <Footer />
-            </>
-          }
-        />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminLanding />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="makeavailable" element={<MakeAvailable />} />
+        </Route>
 
-        <Route
-          path="/user/booknow"
-          element={
-            <>
-              <Navbar />
-              <BookNow />
-              <Footer />
-            </>
-          }
-        />
-
-        <Route
-          path="/user/booking/:id"
-          element={
-            <>
-              <Navbar />
-              <Booking />
-              <Footer />
-            </>
-          }
-        />
-
-        {/* 🔹 Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <>
-              <AdminNavbar />
-              <AdminLanding />
-            </>
-          }
-        />
-
-        <Route
-          path="/admin/AdminBookings"
-          element={
-            <>
-              <AdminNavbar />
-              <AdminBookings />
-            </>
-          }
-        />
-
-        <Route 
-          path="/admin/makeavailable"
-          element={
-            <>
-              <AdminNavbar />
-              <MakeAvailable />
-            </>
-        }
-      />
+        {/* Fallback */}
+        <Route path="*" element={<h1 className="text-center text-white mt-20">404 - Page Not Found</h1>} />
 
       </Routes>
     </Router>

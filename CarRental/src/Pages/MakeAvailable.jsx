@@ -8,7 +8,13 @@ export default function MakeAvailable() {
 
   const handleMakeAvailable = async () => {
     if (!carId) {
-      setMessage('Please enter a valid Car ID.');
+      setMessage(' Please enter a valid Car ID.');
+      return;
+    }
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setMessage(' Please log in as Admin first.');
       return;
     }
 
@@ -18,14 +24,21 @@ export default function MakeAvailable() {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/cars/${carId}/available`, {
         method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // ✅ Send token
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to update availability.');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || ' Failed to update availability.');
+      }
 
-      setMessage(`Car with ID ${carId} marked as available successfully!`);
+      setMessage(` Car with ID ${carId} marked as available successfully!`);
       setCarId('');
     } catch (err) {
-      setMessage(`${err.message}`);
+      setMessage(` ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -53,7 +66,7 @@ export default function MakeAvailable() {
           value={carId}
           onChange={(e) => setCarId(e.target.value)}
           placeholder="Enter Car ID"
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
         />
 
         <button
@@ -65,7 +78,11 @@ export default function MakeAvailable() {
         </button>
 
         {message && (
-          <p className={`mt-4 text-lg font-medium ${message.startsWith('') ? 'text-green-700' : 'text-red-700'}`}>
+          <p
+            className={`mt-4 text-lg font-medium ${
+              message.startsWith('') ? 'text-green-700' : 'text-red-700'
+            }`}
+          >
             {message}
           </p>
         )}

@@ -31,7 +31,7 @@ function AdminNavbar() {
           </Link>
 
           <Link
-            to="/admin/AdminBookings"
+            to="/admin/bookings"
             className="text-white hover:text-gray-300 text-lg transition-colors duration-200"
           >
             Bookings

@@ -1,25 +1,60 @@
 import React, { useEffect, useState } from 'react';
 import Background from '../assets/Images/Background.png';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const role = localStorage.getItem('role');
+
+    if (!token) {
+      setError('No token found. Please login again.');
+      setLoading(false);
+      return;
+    }
+
+    if (role !== 'ADMIN') {
+      setError('Access denied. Only admin can view this page.');
+      setLoading(false);
+      return;
+    }
+
     const fetchBookings = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/bookings`);
-        if (!response.ok) throw new Error('Failed to fetch bookings');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/bookings`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 403) {
+            throw new Error('Access denied by server. Please login as an admin.');
+          } else if (response.status === 401) {
+            throw new Error('Unauthorized. Please login again.');
+          } else {
+            throw new Error('Failed to fetch bookings.');
+          }
+        }
+
         const data = await response.json();
         console.log('Fetched bookings:', data);
         setBookings(data);
       } catch (err) {
+        console.error('Error fetching bookings:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchBookings();
   }, []);
 
@@ -34,11 +69,38 @@ export default function AdminBookings() {
   };
 
   if (loading)
-    return <p className="text-center text-xl mt-10 text-gray-700">Loading bookings...</p>;
+    return (
+      <p className="text-center text-xl mt-10 text-gray-700">
+        Loading bookings...
+      </p>
+    );
+
   if (error)
-    return <p className="text-center text-red-600 mt-10 text-lg">Error: {error}</p>;
+    return (
+      <div
+        style={componentStyle}
+        className="flex flex-col items-center justify-center text-white"
+      >
+        <p className="text-red-500 bg-white bg-opacity-80 px-6 py-3 rounded-lg text-lg shadow-lg">
+          {error}
+        </p>
+        <button
+          onClick={() => navigate('/')}
+          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+        >
+          Go to Login
+        </button>
+      </div>
+    );
+
   if (bookings.length === 0)
-    return <p className="text-center text-gray-700 mt-10 text-lg">No bookings found.</p>;
+    return (
+      <div style={componentStyle}>
+        <p className="text-center text-gray-700 mt-10 text-lg">
+          No bookings found.
+        </p>
+      </div>
+    );
 
   return (
     <div style={componentStyle} className="flex flex-col items-center px-6">
@@ -62,7 +124,6 @@ export default function AdminBookings() {
               <th className="p-3 text-left border-b">Status</th>
             </tr>
           </thead>
-
           <tbody>
             {bookings.map((booking) => (
               <tr
@@ -83,7 +144,8 @@ export default function AdminBookings() {
                 <td className="p-3 border-b">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      booking.status === 'CONFIRMED' || booking.status === 'Approved'
+                      booking.status === 'CONFIRMED' ||
+                      booking.status === 'Approved'
                         ? 'bg-green-200 text-green-800'
                         : booking.status === 'Rejected'
                         ? 'bg-red-200 text-red-800'
