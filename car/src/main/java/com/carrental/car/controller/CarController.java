@@ -15,8 +15,7 @@ public class CarController {
     @Autowired
     private CarService carService;
 
-    // This endpoint gets ALL available cars
-    @CrossOrigin(origins = "http://localhost:5173")
+    // This endpoint gets ALL availabl
     @GetMapping("/available")
     public List<Car> getAvailableCars() {
         return carService.getAvailableCars();
