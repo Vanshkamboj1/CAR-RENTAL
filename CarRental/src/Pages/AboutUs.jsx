@@ -30,6 +30,14 @@ function AboutUs() {
             enjoyable, giving you the freedom to explore India without any hassle.
           </p>
         </div>
+        <br />
+        <div className="bg-black/40 p-10 rounded-xl">
+          <p className="text-white text-xl drop-shadow-md">
+            This website is a non-commercial demonstration project intended solely for educational and portfolio purposes. 
+            The services, listings, and booking functionalities displayed are fictional and do not represent any real-world offering. 
+            The owner of this website is not responsible for any misunderstanding or misuse of this platform.
+          </p>
+        </div>
       </div>
     </section>
   );
