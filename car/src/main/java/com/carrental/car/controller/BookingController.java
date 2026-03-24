@@ -21,7 +21,6 @@ public class BookingController {
      * @param bookingDetails The customer details from the form
      * @return The saved booking
      */
-    @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/car/{carId}")
     public ResponseEntity<Booking> createBooking(
             @PathVariable Long carId,
