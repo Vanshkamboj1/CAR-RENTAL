@@ -32,16 +32,25 @@ public class SecurityConfig {
                                                    JwtAuthenticationFilter jwtAuthFilter,
                                                    AuthenticationProvider authenticationProvider) throws Exception {
         http
-                .cors() // ✅ Enable CORS here
-                .and()
+                // ✅ FIX 1: modern CORS (replaces .cors().and())
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+
+                // ✅ FIX 2: disable CSRF (same as before, just clean)
                 .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // 🔥 FIX 3: allow preflight requests (THIS SOLVES 403)
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // existing rules (unchanged)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/cars/available/**").permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/bookings/**").hasAuthority("USER")
                         .anyRequest().authenticated()
                 )
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
