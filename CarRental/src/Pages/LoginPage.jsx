@@ -18,7 +18,7 @@ const LoginPage = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }), // ✅ no role sent
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) throw new Error('Invalid email or password');
@@ -27,15 +27,17 @@ const LoginPage = () => {
       const token = data.token;
       const decoded = jwtDecode(token);
 
-      // ✅ Store token and chosen role
+      // ✅ Use backend role instead of selected role
+      const backendRole = data.role;
+
       localStorage.setItem('authToken', token);
-      localStorage.setItem('role', role);
+      localStorage.setItem('role', backendRole);
 
       console.log('Decoded JWT:', decoded);
-      console.log('Selected Role:', role);
+      console.log('Backend Role:', backendRole);
 
-      // ✅ Navigate based on chosen role (not backend)
-      if (role === 'ADMIN') {
+      // ✅ Redirect based on backend role
+      if (backendRole === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/user');
@@ -75,19 +77,6 @@ const LoginPage = () => {
             required
             className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
           />
-        </div>
-
-        {/* ✅ Ask role for redirect only */}
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Login As</label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-          >
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-          </select>
         </div>
 
         {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}

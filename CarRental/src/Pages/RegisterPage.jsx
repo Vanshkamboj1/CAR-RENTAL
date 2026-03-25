@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import Background from '../assets/Images/Background.png'; // ✅ import background
+import Background from '../assets/Images/Background.png';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -31,13 +31,18 @@ const RegisterPage = () => {
 
       if (!token) throw new Error('No token received from server.');
 
+      // ✅ Use backend role instead of decoding
+      const backendRole = data.role;
+
       localStorage.setItem('authToken', token);
+      localStorage.setItem('role', backendRole);
 
-      const decoded = jwtDecode(token);
-      const userRole = decoded.role || decoded.roles || decoded.authority;
+      console.log('Backend Role:', backendRole);
 
-      if (userRole === 'ADMIN') navigate('/admin');
+      // ✅ Redirect based on backend role
+      if (backendRole === 'ADMIN') navigate('/admin');
       else navigate('/user');
+
     } catch (err) {
       setError(err.message);
     }
