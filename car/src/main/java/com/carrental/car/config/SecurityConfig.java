@@ -2,8 +2,10 @@ package com.carrental.car.config;
 
 import com.carrental.car.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -27,33 +29,38 @@ public class SecurityConfig {
     @Autowired
     private UserRepository userRepository;
 
+    // ✅ Inject allowed origins from properties
+    @Value("${CORS_ALLOWED_ORIGINS}")
+    private String[] allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtAuthenticationFilter jwtAuthFilter,
                                                    AuthenticationProvider authenticationProvider) throws Exception {
-        http
-                // ✅ FIX 1: modern CORS (replaces .cors().and())
-                .cors(org.springframework.security.config.Customizer.withDefaults())
 
-                // ✅ FIX 2: disable CSRF (same as before, just clean)
+        http
+                .cors(org.springframework.security.config.Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ Allow preflight requests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 🔥 FIX 3: allow preflight requests (THIS SOLVES 403)
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // existing rules (unchanged)
+                        // ✅ Public APIs
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/cars/available/**").permitAll()
+
+                        // ✅ Role-based access
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/bookings/**").hasAuthority("USER")
+
                         .anyRequest().authenticated()
                 )
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -84,15 +91,15 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // ✅ Add this bean for CORS configuration
+    // ✅ CORS Configuration
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173", "https://car-rental-roan-seven.vercel.app")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH")
+                        .allowedOrigins(allowedOrigins) // from properties
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
