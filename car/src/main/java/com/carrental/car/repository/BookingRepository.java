@@ -4,15 +4,14 @@ import com.carrental.car.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional; // Import this
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    // --- ADD THIS METHOD ---
-    /**
-     * Finds the most recent "CONFIRMED" booking for a specific car.
-     * We'll assume this is the booking we want to complete.
-     */
     Optional<Booking> findTopByCarIdAndStatusOrderByEndDateDesc(Long carId, String status);
+
+    // ✅ NEW: get bookings of a user
+    List<Booking> findByUserId(Long userId);
 }

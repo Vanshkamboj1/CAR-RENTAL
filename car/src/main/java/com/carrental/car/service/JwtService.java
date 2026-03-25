@@ -1,5 +1,6 @@
 package com.carrental.car.service;
 
+import com.carrental.car.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -18,49 +19,47 @@ public class JwtService {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    // Token validity in milliseconds (e.g., 24 hours)
     private static final long TOKEN_VALIDITY = 1000 * 60 * 60 * 24;
 
-    // 1. Generate Token
     public String generateToken(UserDetails userDetails) {
+        User user = (User) userDetails;
+
         return Jwts.builder()
-                .subject(userDetails.getUsername()) // Username is the email
+                .subject(user.getUsername())
+                .claim("userId", user.getId()) // ✅ added
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY))
                 .signWith(getSignInKey())
                 .compact();
     }
 
-    // 2. Validate Token
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    // 3. Extract Username (email) from Token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // 4. Check if Token is Expired
+    // ✅ added
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    // 5. Extract Expiration Date
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // --- Helper Methods ---
-
-    // Generic method to extract a single claim
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
         final Claims claims = extractAllClaims(token);
         return resolver.apply(claims);
     }
 
-    // Extracts all claims from the token
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSignInKey())
@@ -69,7 +68,6 @@ public class JwtService {
                 .getPayload();
     }
 
-    // Generates the SecretKey object from the string in application.properties
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);

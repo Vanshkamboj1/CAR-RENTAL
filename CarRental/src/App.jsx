@@ -10,6 +10,7 @@ import Booking from './Pages/Booking';
 import AdminLanding from './Pages/AdminLanding';
 import AdminBookings from './Pages/AdminBookings';
 import MakeAvailable from './Pages/MakeAvailable';
+import Cart from './Pages/Cart'; // ✅ added
 
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="about" element={<AboutUs />} />
           <Route path="booknow" element={<BookNow />} />
           <Route path="booking/:id" element={<Booking />} />
+          <Route path="cart" element={<Cart />} /> {/* ✅ added */}
         </Route>
 
         {/* Admin Routes */}

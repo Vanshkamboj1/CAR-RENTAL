@@ -6,7 +6,8 @@ function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // remove only the JWT
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('role');
     navigate('/'); // redirect to login page
   };
 
@@ -35,7 +36,14 @@ function Navbar() {
           >
             Book Now
           </Link>
-          
+
+          <Link
+            to="/user/cart"
+            className="text-white hover:text-gray-300 text-lg transition-colors duration-200"
+          >
+            Bookings
+          </Link>
+
           <Link
             to="/user/about"
             className="text-white hover:text-gray-300 text-lg transition-colors duration-200"
