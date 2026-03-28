@@ -16,6 +16,7 @@ public class CarApplication {
 		setIfPresent("DB_URL", dotenv);
 		setIfPresent("JWT_SECRET", dotenv);
 		setIfPresent("CLOUDINARY_URL", dotenv);
+		setIfPresent("CORS_ALLOWED_ORIGINS", dotenv);
 
 		SpringApplication.run(CarApplication.class, args);
 	}

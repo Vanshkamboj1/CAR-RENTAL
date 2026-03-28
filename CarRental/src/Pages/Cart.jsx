@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Background from '../assets/Images/Background.png';
 import { useNavigate } from 'react-router-dom';
+import LayoutBox from "../Components/LayoutBox.jsx";
 
 export default function Cart() {
   const [bookings, setBookings] = useState([]);
@@ -11,7 +12,6 @@ export default function Cart() {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
 
-    // ✅ Redirect if not logged in
     if (!token) {
       navigate('/');
       return;
@@ -27,7 +27,6 @@ export default function Cart() {
           },
         });
 
-        // ✅ Handle unauthorized (token expired)
         if (!response.ok) {
           if (response.status === 401) {
             navigate('/');
@@ -50,62 +49,59 @@ export default function Cart() {
     fetchBookings();
   }, [navigate]);
 
-  const componentStyle = {
-    backgroundImage: `url(${Background})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    width: '100%',
-    minHeight: '100vh',
-    paddingTop: '6rem',
-    paddingBottom: '5rem',
-  };
-
+  // ✅ Loading
   if (loading)
     return (
-      <p className="text-center text-xl mt-10 text-gray-700">
-        Loading your bookings...
-      </p>
+      <LayoutBox background={Background}>
+        <p className="text-center text-xl text-gray-700">
+          Loading your bookings...
+        </p>
+      </LayoutBox>
     );
 
+  // ❌ Error
   if (error)
     return (
-      <div
-        style={componentStyle}
-        className="flex flex-col items-center justify-center text-white"
-      >
-        <p className="text-red-500 bg-white bg-opacity-80 px-6 py-3 rounded-lg text-lg shadow-lg">
-          {error}
-        </p>
-        <button
-          onClick={() => navigate('/')}
-          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-        >
-          Go to Login
-        </button>
-      </div>
+      <LayoutBox background={Background}>
+        <div className="flex flex-col items-center justify-center">
+          <p className="text-red-500 bg-white/80 px-6 py-3 rounded-lg text-lg shadow-lg">
+            {error}
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            Go to Login
+          </button>
+        </div>
+      </LayoutBox>
     );
 
+  // 📭 No bookings
   if (bookings.length === 0)
     return (
-      <div style={componentStyle}>
-        <p className="text-center text-gray-700 mt-10 text-lg">
+      <LayoutBox background={Background}>
+        <p className="text-center text-gray-700 text-lg">
           No bookings found.
         </p>
-      </div>
+      </LayoutBox>
     );
 
+  // ✅ Main UI
   return (
-    <div style={componentStyle} className="flex flex-col items-center px-6">
-      <h2 className="text-3xl font-bold mb-8 text-white bg-gray-800 bg-opacity-70 px-6 py-3 rounded-lg shadow-lg">
+    <LayoutBox background={Background}>
+
+      {/* Title */}
+      <h2 className="text-3xl font-bold text-center mb-8 text-black">
         My Bookings
       </h2>
 
-      <div className="overflow-x-auto w-full max-w-6xl bg-white bg-opacity-90 rounded-lg shadow-lg p-6">
+      {/* Table */}
+      <div className="overflow-x-auto w-full bg-white/90 rounded-2xl shadow-xl p-6">
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-200 text-gray-800">
               <th className="p-3 text-left border-b">Booking ID</th>
-              
               <th className="p-3 text-left border-b">Car Name</th>
               <th className="p-3 text-left border-b">Email</th>
               <th className="p-3 text-left border-b">Start Date</th>
@@ -114,6 +110,7 @@ export default function Cart() {
               <th className="p-3 text-left border-b">Status</th>
             </tr>
           </thead>
+
           <tbody>
             {bookings.map((booking) => (
               <tr
@@ -121,7 +118,6 @@ export default function Cart() {
                 className="hover:bg-gray-100 transition duration-200 text-gray-800"
               >
                 <td className="p-3 border-b">{booking.id}</td>
-                
                 <td className="p-3 border-b">{booking.car?.name || 'N/A'}</td>
                 <td className="p-3 border-b">{booking.email}</td>
                 <td className="p-3 border-b">{booking.startDate}</td>
@@ -148,6 +144,7 @@ export default function Cart() {
           </tbody>
         </table>
       </div>
-    </div>
+
+    </LayoutBox>
   );
 }

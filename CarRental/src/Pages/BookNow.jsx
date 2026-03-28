@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminCarCard from '../Components/AdminCarCard.jsx';
+import LayoutBox from '../Components/LayoutBox.jsx';
+import Background from '../assets/Images/Background.png';
 
 const BookNow = () => {
   const [cars, setCars] = useState([]);
@@ -14,7 +16,6 @@ const BookNow = () => {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/cars/available`);
         const allCars = response.data;
 
-        // ❌ Exclude cars whose location contains "india" (case-insensitive)
         const filtered = allCars.filter(
           (car) =>
             !(car.location && car.location.toLowerCase().includes('india'))
@@ -23,7 +24,7 @@ const BookNow = () => {
         setCars(filtered);
       } catch (err) {
         console.error('Error fetching cars:', err);
-        setError('Failed to load cars. Please try again later.');
+        setError('Failed to load cars.');
       } finally {
         setLoading(false);
       }
@@ -32,50 +33,78 @@ const BookNow = () => {
     fetchCars();
   }, []);
 
-  // ✅ Allow search (based on remaining cars)
   const filteredCars = cars.filter((car) =>
     car.location?.toLowerCase().includes(searchLocation.toLowerCase())
   );
 
-  if (loading) {
-    return <div className="text-center text-xl mt-10">Loading cars...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center text-red-500 text-xl mt-10">{error}</div>;
-  }
-
   return (
-    <div className="mt-18 flex flex-col pl-14 bg-gray-500/50">
-      <div className="flex flex-col w-full mb-5">
-        <h2 className="text-2xl font-bold text-center mt-5">Available Cars</h2>
+    <LayoutBox background={Background}>
 
-        {/* Search bar */}
-        <div className="flex justify-end mt-4 mb-5">
+      {/* Header */}
+      <div className="relative mb-10">
+
+        {/* Title Center */}
+        <h2 className="text-3xl font-bold text-black text-center">
+          Available Cars
+        </h2>
+
+        {/* Search Right */}
+        <div className="absolute right-0 top-0">
           <input
             type="text"
             placeholder="Search by location"
             value={searchLocation}
             onChange={(e) => setSearchLocation(e.target.value)}
-            className="p-2 rounded border border-gray-400 focus:outline-none w-64"
+            className="p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 w-64 bg-white/80"
           />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-10">
-          {filteredCars.length > 0 ? (
-            filteredCars.map((car) => (
-              <div key={car.id} className="w-[22%] min-w-[250px]">
-                <AdminCarCard car={car} />
-              </div>
-            ))
-          ) : (
-            <p className="text-center w-full text-xl mt-5">
-              No cars available for this location
-            </p>
-          )}
-        </div>
       </div>
-    </div>
+
+      {/* Loading */}
+      {loading && (
+        <p className="text-center text-gray-700 text-lg">Loading cars...</p>
+      )}
+
+      {/* Error */}
+      {error && (
+        <p className="text-center text-red-500 text-lg">{error}</p>
+      )}
+
+      {/* Cars Grid with Scroll */}
+      {!loading && !error && (
+        <div className="flex justify-center">
+
+          {/* 🔥 Scroll Container */}
+          <div className="w-full max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400/40 hover:scrollbar-thumb-gray-400/70">
+
+            {/* Padding so scrollbar stays at edge */}
+            <div className="px-6">
+
+              <div className="grid grid-cols-3 gap-14">
+
+                {filteredCars.length > 0 ? (
+                  filteredCars.map((car) => (
+                    <div key={car.id} className="flex justify-center">
+                      <AdminCarCard car={car} />
+                    </div>
+                  ))
+                ) : (
+                  <p className="col-span-3 text-center text-lg text-gray-700">
+                    No cars available
+                  </p>
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+    </LayoutBox>
   );
 };
 

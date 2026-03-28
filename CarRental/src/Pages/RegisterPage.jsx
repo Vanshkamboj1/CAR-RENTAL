@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import Background from '../assets/Images/Background.png';
 
 const RegisterPage = () => {
@@ -28,18 +27,11 @@ const RegisterPage = () => {
 
       const data = await response.json();
       const token = data.token;
-
-      if (!token) throw new Error('No token received from server.');
-
-      // ✅ Use backend role instead of decoding
       const backendRole = data.role;
 
       localStorage.setItem('authToken', token);
       localStorage.setItem('role', backendRole);
 
-      console.log('Backend Role:', backendRole);
-
-      // ✅ Redirect based on backend role
       if (backendRole === 'ADMIN') navigate('/admin');
       else navigate('/user');
 
@@ -50,73 +42,99 @@ const RegisterPage = () => {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen bg-cover bg-center"
+      className="flex items-center justify-center min-h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${Background})` }}
     >
-      <h1 className="text-3xl font-bold mb-6 text-black">Create Account</h1>
-      
-      <form onSubmit={handleRegister} className="p-6 bg-white rounded shadow-md w-80">
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Full Name</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            required
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-          />
-        </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-          />
-        </div>
+      {/* Glass Box */}
+      <div className="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-sm">
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-          />
-        </div>
+        {/* Title */}
+        <h1 className="text-3xl font-bold mb-6 text-center text-black">
+          Create Account
+        </h1>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Register as</label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+        {/* Form */}
+        <form onSubmit={handleRegister}>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-semibold mb-2">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              className="border rounded w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-black/20"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-semibold mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="border rounded w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-black/20"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-semibold mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="border rounded w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-black/20"
+            />
+          </div>
+
+          <div className="mb-5">
+            <label className="block text-gray-700 text-sm font-semibold mb-2">
+              Register as
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="border rounded w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-black/20"
+            >
+              <option value="USER">User</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-red-500 text-sm mb-4 text-center">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            className="bg-black text-white py-2 rounded-lg w-full hover:bg-gray-800 transition"
           >
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
+            Sign Up
+          </button>
+        </form>
 
-        {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
+        {/* Login Link */}
+        <p className="mt-4 text-center text-sm text-gray-700">
+          Already have an account?{' '}
+          <Link to="/" className="text-blue-600 hover:underline">
+            Log in here
+          </Link>
+        </p>
 
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded shadow w-full"
-        >
-          Sign Up
-        </button>
-      </form>
+      </div>
 
-      <p className="mt-4 text-center text-sm text-gray-100">
-        Already have an account?{' '}
-        <Link to="/" className="font-medium text-blue-600 hover:text-blue-500">
-          Log in here
-        </Link>
-      </p>
     </div>
   );
 };
