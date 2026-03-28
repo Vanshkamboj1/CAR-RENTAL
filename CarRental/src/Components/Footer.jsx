@@ -36,12 +36,8 @@ function Footer() {
         <div className="text-sm text-gray-700 text-center md:text-right">
           <p>Email: support@wheelx.com</p>
           <p>Phone: +91 98765 43210</p>
-          <p><p>© 2026 Car Rental. Developed by Vansh Kumar</p></p>
+          <p><p>© 2025 WheelX. Developed by Vansh Kumar</p></p>
         </div>
-      </div>
-
-      <div className="text-center text-gray-500 text-xs mt-4">
-        &copy; {new Date().getFullYear()} WheelX. All rights reserved.
       </div>
     </footer>
   );
