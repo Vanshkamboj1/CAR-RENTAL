@@ -13,7 +13,13 @@ export default function AdminLandingPage() {
     name: '',
     price: '',
     location: '',
-    available: true
+    available: true,
+    registrationNumber: '',
+    seatingCapacity: '',
+    bootSpace: '',
+    fuelEfficiency: '',
+    drivePreferences: '',
+    modelYear: ''
   });
 
   const token = localStorage.getItem('authToken');
@@ -65,7 +71,13 @@ export default function AdminLandingPage() {
     setSuccessMessage('');
 
     try {
-      const finalCarData = { ...carDetails, imageUrl };
+      const finalCarData = { 
+        ...carDetails, 
+        seatingCapacity: Number(carDetails.seatingCapacity),
+        modelYear: Number(carDetails.modelYear),
+        price: Number(carDetails.price),
+        imageUrl 
+      };
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/cars`, {
         method: 'POST',
@@ -81,7 +93,11 @@ export default function AdminLandingPage() {
 
       setSuccessMessage(' Car added successfully!');
       setStep(1);
-      setCarDetails({ name: '', price: '', location: '', available: true });
+      setCarDetails({ 
+        name: '', price: '', location: '', available: true,
+        registrationNumber: '', seatingCapacity: '', bootSpace: '',
+        fuelEfficiency: '', drivePreferences: '', modelYear: '' 
+      });
       setImageUrl('');
       setSelectedFile(null);
 
@@ -198,6 +214,72 @@ export default function AdminLandingPage() {
               className="border p-2 w-full rounded"
               required
             />
+
+            <input
+              type="text"
+              name="registrationNumber"
+              placeholder="Registration Number"
+              value={carDetails.registrationNumber}
+              onChange={handleInputChange}
+              className="border p-2 w-full rounded"
+              required
+            />
+
+            <div className="flex gap-4">
+              <input
+                type="number"
+                name="seatingCapacity"
+                placeholder="Seating Capacity (e.g. 5)"
+                value={carDetails.seatingCapacity}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded"
+                required
+              />
+
+              <input
+                type="number"
+                name="modelYear"
+                placeholder="Model Year (e.g. 2023)"
+                value={carDetails.modelYear}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded"
+                required
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <input
+                type="text"
+                name="bootSpace"
+                placeholder="Boot Space (e.g. 450L)"
+                value={carDetails.bootSpace}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded"
+                required
+              />
+
+              <input
+                type="text"
+                name="fuelEfficiency"
+                placeholder="Fuel Efficiency (e.g. 18 km/l)"
+                value={carDetails.fuelEfficiency}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded"
+                required
+              />
+            </div>
+
+            <select
+              name="drivePreferences"
+              value={carDetails.drivePreferences}
+              onChange={handleInputChange}
+              className="border p-2 w-full rounded"
+              required
+            >
+              <option value="" disabled>Select Drive Preference</option>
+              <option value="Manual">Manual</option>
+              <option value="Automatic">Automatic</option>
+            </select>
 
             <label className="flex items-center gap-2">
               <input

@@ -62,10 +62,10 @@ function LandingPage() {
 
       {/* Title */}
       <h4 className="text-3xl font-bold text-center mb-1 text-black/70 mt-10">
-        Cars Available in India
+        Cars Available Throughout India
       </h4>
       <p className="text-sm text-center text-black mb-4 drop-shadow-md">
-        Only showing cars located in India. Book at least 1 week in advance for guaranteed availability.
+        Book at least 1 week in advance for guaranteed availability.
       </p>
 
       {/* Loading / Error */}

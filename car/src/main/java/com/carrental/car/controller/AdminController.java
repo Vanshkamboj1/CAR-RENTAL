@@ -77,4 +77,24 @@ public class AdminController {
         List<Booking> bookings = bookingService.getAllBookings();
         return ResponseEntity.ok(bookings);
     }
+
+    @PatchMapping("/bookings/{bookingId}/approve")
+    public ResponseEntity<?> approveBooking(@PathVariable Long bookingId) {
+        try {
+            Booking updatedBooking = bookingService.approveBooking(bookingId);
+            return ResponseEntity.ok(updatedBooking);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/bookings/{bookingId}/reject")
+    public ResponseEntity<?> rejectBooking(@PathVariable Long bookingId) {
+        try {
+            Booking updatedBooking = bookingService.rejectBooking(bookingId);
+            return ResponseEntity.ok(updatedBooking);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

@@ -57,11 +57,43 @@ public class BookingService {
         car.setAvailable(false);
         bookingDetails.setCar(car);
         bookingDetails.setTotalPrice(totalPrice);
-        bookingDetails.setStatus("CONFIRMED");
+        bookingDetails.setStatus("REQUESTED");
         bookingDetails.setUserId(userId);
 
         carRepository.save(car);
         return bookingRepository.save(bookingDetails);
+    }
+
+    @Transactional
+    public Booking approveBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
+                
+        if (!"REQUESTED".equals(booking.getStatus())) {
+            throw new RuntimeException("Only REQUESTED bookings can be approved. Current status: " + booking.getStatus());
+        }
+        
+        booking.setStatus("CONFIRMED");
+        return bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public Booking rejectBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
+                
+        if (!"REQUESTED".equals(booking.getStatus())) {
+            throw new RuntimeException("Only REQUESTED bookings can be rejected. Current status: " + booking.getStatus());
+        }
+        
+        booking.setStatus("REJECTED");
+        
+        // Free up the car since the booking was denied
+        Car car = booking.getCar();
+        car.setAvailable(true);
+        carRepository.save(car);
+        
+        return bookingRepository.save(booking);
     }
 
     public List<Booking> getAllBookings() {

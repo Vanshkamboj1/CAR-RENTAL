@@ -4,23 +4,27 @@ import LayoutBox from '../Components/LayoutBox.jsx';
 
 export default function MakeAvailable() {
   const [carId, setCarId] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' });
+  const [carLoading, setCarLoading] = useState(false);
+  const [carMessage, setCarMessage] = useState({ text: '', type: '' });
+
+  const [bookingId, setBookingId] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState({ text: '', type: '' });
+
+  const token = localStorage.getItem('authToken');
 
   const handleMakeAvailable = async () => {
     if (!carId) {
-      setMessage({ text: 'Please enter a valid Car ID.', type: 'error' });
+      setCarMessage({ text: 'Please enter a valid Car ID.', type: 'error' });
       return;
     }
-
-    const token = localStorage.getItem('authToken');
     if (!token) {
-      setMessage({ text: 'Please log in as Admin first.', type: 'error' });
+      setCarMessage({ text: 'Please log in as Admin first.', type: 'error' });
       return;
     }
 
-    setLoading(true);
-    setMessage({ text: '', type: '' });
+    setCarLoading(true);
+    setCarMessage({ text: '', type: '' });
 
     try {
       const response = await fetch(
@@ -39,63 +43,139 @@ export default function MakeAvailable() {
         throw new Error(errorText || 'Failed to update availability.');
       }
 
-      setMessage({
+      setCarMessage({
         text: `Car with ID ${carId} marked as available successfully!`,
         type: 'success',
       });
-
       setCarId('');
-
     } catch (err) {
-      setMessage({
-        text: err.message,
-        type: 'error',
-      });
+      setCarMessage({ text: err.message, type: 'error' });
     } finally {
-      setLoading(false);
+      setCarLoading(false);
+    }
+  };
+
+  const handleBookingAction = async (actionType) => {
+    if (!bookingId) {
+      setBookingMessage({ text: 'Please enter a valid Booking ID.', type: 'error' });
+      return;
+    }
+    if (!token) {
+      setBookingMessage({ text: 'Please log in as Admin first.', type: 'error' });
+      return;
+    }
+
+    setBookingLoading(true);
+    setBookingMessage({ text: '', type: '' });
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/admin/bookings/${bookingId}/${actionType}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Failed to ${actionType} booking.`);
+      }
+
+      setBookingMessage({
+        text: `Booking with ID ${bookingId} was successfully ${actionType}d!`,
+        type: 'success',
+      });
+      setBookingId('');
+    } catch (err) {
+      setBookingMessage({ text: err.message, type: 'error' });
+    } finally {
+      setBookingLoading(false);
     }
   };
 
   return (
     <LayoutBox background={Background}>
+      <div className="flex flex-col gap-10 max-w-lg mx-auto w-full">
+        
+        {/* MAKE CAR AVAILABLE */}
+        <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Make Car Available
+          </h2>
 
-      <div className="max-w-md mx-auto bg-white/90 backdrop-blur-md p-10 rounded-2xl shadow-xl text-center">
+          <input
+            type="number"
+            value={carId}
+            onChange={(e) => setCarId(e.target.value)}
+            placeholder="Enter Car ID"
+            className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
 
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">
-          Make Car Available
-        </h2>
-
-        <input
-          type="number"
-          value={carId}
-          onChange={(e) => setCarId(e.target.value)}
-          placeholder="Enter Car ID"
-          className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <button
-          onClick={handleMakeAvailable}
-          disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition"
-        >
-          {loading ? 'Updating...' : 'Make Available'}
-        </button>
-
-        {/* Message */}
-        {message.text && (
-          <p
-            className={`mt-4 font-medium ${
-              message.type === 'success'
-                ? 'text-green-700'
-                : 'text-red-700'
-            }`}
+          <button
+            onClick={handleMakeAvailable}
+            disabled={carLoading}
+            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg shadow-md transition"
           >
-            {message.text}
-          </p>
-        )}
+            <span className="drop-shadow-[inset_0_1px_1px_rgba(0,0,0,0.4)]">
+              {carLoading ? 'Updating...' : 'Make Available'}
+            </span>
+          </button>
+
+          {carMessage.text && (
+            <p className={`mt-4 font-medium ${carMessage.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+              {carMessage.text}
+            </p>
+          )}
+        </div>
+
+        {/* MANAGE BOOKINGS */}
+        <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Manage Booking Requests
+          </h2>
+
+          <input
+            type="number"
+            value={bookingId}
+            onChange={(e) => setBookingId(e.target.value)}
+            placeholder="Enter Booking ID"
+            className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => handleBookingAction('approve')}
+              disabled={bookingLoading}
+              className="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg shadow-md transition"
+            >
+              <span className="drop-shadow-[inset_0_1px_1px_rgba(0,0,0,0.4)]">
+                {bookingLoading ? 'Processing...' : 'Approve'}
+              </span>
+            </button>
+
+            <button
+              onClick={() => handleBookingAction('reject')}
+              disabled={bookingLoading}
+              className="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg shadow-md transition"
+            >
+              <span className="drop-shadow-[inset_0_1px_1px_rgba(0,0,0,0.4)]">
+                {bookingLoading ? 'Processing...' : 'Reject'}
+              </span>
+            </button>
+          </div>
+
+          {bookingMessage.text && (
+            <p className={`mt-4 font-medium ${bookingMessage.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+              {bookingMessage.text}
+            </p>
+          )}
+        </div>
 
       </div>
-
     </LayoutBox>
   );
 }
