@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Import Transactional
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -54,8 +55,8 @@ public class CarService {
         car.setAvailable(true);
 
         // 3. Find and update the booking
-        // This finds the most recent booking for this car that is still "CONFIRMED"
-        bookingRepository.findTopByCarIdAndStatusOrderByEndDateDesc(carId, "CONFIRMED")
+        // This finds the most recent booking for this car that is "CONFIRMED" or "APPROVED"
+        bookingRepository.findTopByCarIdAndStatusInOrderByEndDateDesc(carId, Arrays.asList("CONFIRMED", "APPROVED"))
                 .ifPresent(booking -> {
                     booking.setStatus("COMPLETED");
                     bookingRepository.save(booking);

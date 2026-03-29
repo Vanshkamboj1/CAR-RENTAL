@@ -13,6 +13,10 @@ public class BookingDTO {
     private double totalPrice;
     private String status;
     private CarDTO car;
+    
+    // ✅ Documents
+    private String aadharUrl;
+    private String drivingLicenseUrl;
 
     public BookingDTO() {}
 
@@ -94,5 +98,21 @@ public class BookingDTO {
 
     public void setCar(CarDTO car) {
         this.car = car;
+    }
+
+    public String getAadharUrl() {
+        return aadharUrl;
+    }
+
+    public void setAadharUrl(String aadharUrl) {
+        this.aadharUrl = aadharUrl;
+    }
+
+    public String getDrivingLicenseUrl() {
+        return drivingLicenseUrl;
+    }
+
+    public void setDrivingLicenseUrl(String drivingLicenseUrl) {
+        this.drivingLicenseUrl = drivingLicenseUrl;
     }
 }

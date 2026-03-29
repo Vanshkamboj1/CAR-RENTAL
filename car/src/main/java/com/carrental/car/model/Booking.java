@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "booking")
+@Table(name = "booking", indexes = {
+    @Index(name = "idx_booking_status", columnList = "status"),
+    @Index(name = "idx_booking_user_id", columnList = "user_id"),
+    @Index(name = "idx_booking_car_id", columnList = "car_id")
+})
 public class Booking {
 
     @Id
@@ -30,6 +34,11 @@ public class Booking {
     // ✅ New field for user ID
     @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    // ✅ Link to Booking Document
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "booking_document_id", referencedColumnName = "id")
+    private BookingDocument bookingDocument;
 
     // Constructor
     public Booking() {}
@@ -114,5 +123,13 @@ public class Booking {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public BookingDocument getBookingDocument() {
+        return bookingDocument;
+    }
+
+    public void setBookingDocument(BookingDocument bookingDocument) {
+        this.bookingDocument = bookingDocument;
     }
 }

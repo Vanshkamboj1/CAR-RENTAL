@@ -49,7 +49,6 @@ export default function Cart() {
     fetchBookings();
   }, [navigate]);
 
-  // ✅ Loading
   if (loading)
     return (
       <LayoutBox background={Background}>
@@ -59,7 +58,6 @@ export default function Cart() {
       </LayoutBox>
     );
 
-  // ❌ Error
   if (error)
     return (
       <LayoutBox background={Background}>
@@ -77,7 +75,6 @@ export default function Cart() {
       </LayoutBox>
     );
 
-  // 📭 No bookings
   if (bookings.length === 0)
     return (
       <LayoutBox background={Background}>
@@ -87,7 +84,6 @@ export default function Cart() {
       </LayoutBox>
     );
 
-  // ✅ Main UI
   return (
     <LayoutBox background={Background}>
 
@@ -96,56 +92,65 @@ export default function Cart() {
         My Bookings
       </h2>
 
-      {/* Table */}
-      <div className="overflow-x-auto w-full bg-white/90 rounded-2xl shadow-xl p-6">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-200 text-gray-800">
-              <th className="p-3 text-left border-b">Booking ID</th>
-              <th className="p-3 text-left border-b">Car Name</th>
-              <th className="p-3 text-left border-b">Email</th>
-              <th className="p-3 text-left border-b">Start Date</th>
-              <th className="p-3 text-left border-b">End Date</th>
-              <th className="p-3 text-left border-b">Total Price</th>
-              <th className="p-3 text-left border-b">Status</th>
-            </tr>
-          </thead>
+      {/* ✅ Card */}
+      <div className="w-full bg-white/90 rounded-2xl shadow-xl p-6">
 
-          <tbody>
-            {bookings.map((booking) => (
-              <tr
-                key={booking.id}
-                className="hover:bg-gray-100 transition duration-200 text-gray-800"
-              >
-                <td className="p-3 border-b">{booking.id}</td>
-                <td className="p-3 border-b">{booking.car?.name || 'N/A'}</td>
-                <td className="p-3 border-b">{booking.email}</td>
-                <td className="p-3 border-b">{booking.startDate}</td>
-                <td className="p-3 border-b">{booking.endDate}</td>
-                <td className="p-3 border-b text-green-600 font-semibold">
-                  ₹{booking.totalPrice}
-                </td>
-                <td className="p-3 border-b">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      booking.status === 'REQUESTED'
-                        ? 'bg-yellow-200 text-yellow-800'
-                        : booking.status === 'CONFIRMED' || booking.status === 'APPROVED'
-                        ? 'bg-blue-200 text-blue-800'
-                        : booking.status === 'REJECTED'
-                        ? 'bg-red-200 text-red-800'
-                        : booking.status === 'COMPLETED'
-                        ? 'bg-green-200 text-green-800'
-                        : 'bg-gray-200 text-gray-800'
-                    }`}
-                  >
-                    {booking.status}
-                  </span>
-                </td>
+        {/* ✅ Scroll inside card */}
+        <div className="max-h-[60vh] overflow-y-auto overflow-x-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400/40 hover:scrollbar-thumb-gray-400/70">
+
+          <table className="w-full border-collapse">
+
+            {/* ✅ Sticky Header */}
+            <thead>
+              <tr className="text-gray-800">
+                <th className="p-3 text-left border-b bg-gray-200 sticky top-0 z-20">Booking ID</th>
+                <th className="p-3 text-left border-b bg-gray-200 sticky top-0 z-20">Car Name</th>
+                <th className="p-3 text-left border-b bg-gray-200 sticky top-0 z-20">Email</th>
+                <th className="p-3 text-left border-b bg-gray-200 sticky top-0 z-20">Start Date</th>
+                <th className="p-3 text-left border-b bg-gray-200 sticky top-0 z-20">End Date</th>
+                <th className="p-3 text-left border-b bg-gray-200 sticky top-0 z-20">Total Price</th>
+                <th className="p-3 text-left border-b bg-gray-200 sticky top-0 z-20">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {bookings.map((booking) => (
+                <tr
+                  key={booking.id}
+                  className="hover:bg-gray-100 transition duration-200 text-gray-800"
+                >
+                  <td className="p-3 border-b">{booking.id}</td>
+                  <td className="p-3 border-b">{booking.car?.name || 'N/A'}</td>
+                  <td className="p-3 border-b">{booking.email}</td>
+                  <td className="p-3 border-b">{booking.startDate}</td>
+                  <td className="p-3 border-b">{booking.endDate}</td>
+                  <td className="p-3 border-b text-green-600 font-semibold">
+                    ₹{booking.totalPrice}
+                  </td>
+                  <td className="p-3 border-b">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        booking.status === 'REQUESTED'
+                          ? 'bg-yellow-200 text-yellow-800'
+                          : booking.status === 'CONFIRMED' || booking.status === 'APPROVED'
+                          ? 'bg-blue-200 text-blue-800'
+                          : booking.status === 'REJECTED'
+                          ? 'bg-red-200 text-red-800'
+                          : booking.status === 'COMPLETED'
+                          ? 'bg-green-200 text-green-800'
+                          : 'bg-gray-200 text-gray-800'
+                      }`}
+                    >
+                      {booking.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+
+        </div>
       </div>
 
     </LayoutBox>

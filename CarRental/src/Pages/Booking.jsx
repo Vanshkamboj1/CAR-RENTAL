@@ -16,7 +16,13 @@ const Booking = () => {
     endDate: '',
   });
 
+  const [documents, setDocuments] = useState({
+    aadharCard: null,
+    drivingLicense: null,
+  });
+
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
   const token = localStorage.getItem('authToken');
@@ -53,6 +59,10 @@ const Booking = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    setDocuments({ ...documents, [e.target.name]: e.target.files[0] });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage({ text: '', type: '' });
@@ -75,6 +85,39 @@ const Booking = () => {
       return;
     }
 
+    if (!documents.aadharCard || !documents.drivingLicense) {
+      setMessage({ text: 'Aadhar Card and Driving License are required.', type: 'error' });
+      return;
+    }
+
+    setIsUploading(true);
+    let aadharUrl = '';
+    let drivingLicenseUrl = '';
+
+    try {
+      const uploadFile = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/upload-document`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        if (!res.ok) throw new Error('File upload failed');
+        return await res.text();
+      };
+
+      setMessage({ text: 'Uploading documents...', type: 'info' });
+      aadharUrl = await uploadFile(documents.aadharCard);
+      drivingLicenseUrl = await uploadFile(documents.drivingLicense);
+    } catch (err) {
+      setIsUploading(false);
+      setMessage({ text: '❌ Failed to upload documents.', type: 'error' });
+      return;
+    }
+
     const bookingData = {
       fullName: formData.fullName,
       email: formData.email,
@@ -83,6 +126,10 @@ const Booking = () => {
       endDate: formData.endDate,
       totalPrice,
       status: 'Pending',
+      bookingDocument: {
+        aadharUrl,
+        drivingLicenseUrl
+      }
     };
 
     try {
@@ -112,6 +159,14 @@ const Booking = () => {
           endDate: '',
         });
 
+        setDocuments({
+          aadharCard: null,
+          drivingLicense: null,
+        });
+
+        document.getElementById("aadharCardInput").value = "";
+        document.getElementById("drivingLicenseInput").value = "";
+
         setTotalPrice(0);
 
         setTimeout(() => setMessage({ text: '', type: '' }), 4000);
@@ -124,6 +179,8 @@ const Booking = () => {
         text: '⚠️ Backend connection error.',
         type: 'error',
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -214,7 +271,30 @@ const Booking = () => {
           name="endDate"
           value={formData.endDate}
           onChange={handleChange}
-          className="w-full p-2 mb-5 border rounded"
+          className="w-full p-2 mb-4 border rounded"
+          required
+        />
+
+        {/* ✅ Documents Upload */}
+        <label className="block mb-1 font-medium">Aadhar Card</label>
+        <input
+          id="aadharCardInput"
+          type="file"
+          name="aadharCard"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="w-full p-2 mb-3 border rounded text-sm text-gray-700 bg-white"
+          required
+        />
+
+        <label className="block mb-1 font-medium">Driving License</label>
+        <input
+          id="drivingLicenseInput"
+          type="file"
+          name="drivingLicense"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="w-full p-2 mb-5 border rounded text-sm text-gray-700 bg-white"
           required
         />
 
@@ -225,9 +305,12 @@ const Booking = () => {
 
         <button
           type="submit"
-          className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition"
+          disabled={isUploading}
+          className={`w-full py-2 rounded-lg transition text-white ${
+            isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'
+          }`}
         >
-          Confirm Booking
+          {isUploading ? 'Uploading & Confirming...' : 'Confirm Booking'}
         </button>
       </form>
 

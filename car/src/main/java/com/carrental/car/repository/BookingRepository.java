@@ -13,10 +13,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findTopByCarIdAndStatusOrderByEndDateDesc(Long carId, String status);
 
-    @EntityGraph(attributePaths = {"car"})
+    Optional<Booking> findTopByCarIdAndStatusInOrderByEndDateDesc(Long carId, List<String> statuses);
+
+    @EntityGraph(attributePaths = {"car", "bookingDocument"})
     List<Booking> findAll();
 
     // ✅ NEW: get bookings of a user
-    @EntityGraph(attributePaths = {"car"})
+    @EntityGraph(attributePaths = {"car", "bookingDocument"})
     List<Booking> findByUserId(Long userId);
 }

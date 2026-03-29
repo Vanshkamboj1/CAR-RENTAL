@@ -143,6 +143,12 @@ public class BookingService {
             carDTO.setName(booking.getCar().getName());
             dto.setCar(carDTO);
         }
+
+        if (booking.getBookingDocument() != null) {
+            dto.setAadharUrl(booking.getBookingDocument().getAadharUrl());
+            dto.setDrivingLicenseUrl(booking.getBookingDocument().getDrivingLicenseUrl());
+        }
+
         return dto;
     }
 }
