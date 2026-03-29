@@ -128,12 +128,15 @@ export default function Cart() {
                 <td className="p-3 border-b">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      booking.status === 'CONFIRMED' ||
-                      booking.status === 'Approved'
-                        ? 'bg-green-200 text-green-800'
-                        : booking.status === 'Rejected'
+                      booking.status === 'REQUESTED'
+                        ? 'bg-yellow-200 text-yellow-800'
+                        : booking.status === 'CONFIRMED' || booking.status === 'APPROVED'
+                        ? 'bg-blue-200 text-blue-800'
+                        : booking.status === 'REJECTED'
                         ? 'bg-red-200 text-red-800'
-                        : 'bg-yellow-200 text-yellow-800'
+                        : booking.status === 'COMPLETED'
+                        ? 'bg-green-200 text-green-800'
+                        : 'bg-gray-200 text-gray-800'
                     }`}
                   >
                     {booking.status}

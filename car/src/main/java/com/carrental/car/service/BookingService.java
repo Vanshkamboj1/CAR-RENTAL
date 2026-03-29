@@ -77,6 +77,8 @@ public class BookingService {
             throw new RuntimeException("Only REQUESTED bookings can be approved. Current status: " + booking.getStatus());
         }
         
+        booking.setStatus("APPROVED");
+        
         Booking savedBooking = bookingRepository.save(booking);
         return mapToDTO(savedBooking);
     }
