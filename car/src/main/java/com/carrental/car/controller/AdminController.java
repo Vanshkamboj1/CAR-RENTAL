@@ -1,6 +1,6 @@
 package com.carrental.car.controller;
 
-import com.carrental.car.model.Booking; // Import Booking
+import com.carrental.car.dto.BookingDTO;
 import com.carrental.car.model.Car;
 import com.carrental.car.service.BookingService; // Import BookingService
 import com.carrental.car.service.CarService;
@@ -73,15 +73,15 @@ public class AdminController {
      * Gets a list of all bookings in the system.
      */
     @GetMapping("/bookings")
-    public ResponseEntity<List<Booking>> getAllBookings() {
-        List<Booking> bookings = bookingService.getAllBookings();
+    public ResponseEntity<List<BookingDTO>> getAllBookings() {
+        List<BookingDTO> bookings = bookingService.getAllBookings();
         return ResponseEntity.ok(bookings);
     }
 
     @PatchMapping("/bookings/{bookingId}/approve")
     public ResponseEntity<?> approveBooking(@PathVariable Long bookingId) {
         try {
-            Booking updatedBooking = bookingService.approveBooking(bookingId);
+            BookingDTO updatedBooking = bookingService.approveBooking(bookingId);
             return ResponseEntity.ok(updatedBooking);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -91,7 +91,7 @@ public class AdminController {
     @PatchMapping("/bookings/{bookingId}/reject")
     public ResponseEntity<?> rejectBooking(@PathVariable Long bookingId) {
         try {
-            Booking updatedBooking = bookingService.rejectBooking(bookingId);
+            BookingDTO updatedBooking = bookingService.rejectBooking(bookingId);
             return ResponseEntity.ok(updatedBooking);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

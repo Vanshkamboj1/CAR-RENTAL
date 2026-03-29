@@ -1,6 +1,8 @@
 package com.carrental.car.service;
 
 import com.carrental.car.model.Booking;
+import com.carrental.car.dto.BookingDTO;
+import com.carrental.car.dto.CarDTO;
 import com.carrental.car.model.Car;
 import com.carrental.car.repository.BookingRepository;
 import com.carrental.car.repository.CarRepository;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -25,7 +28,7 @@ public class BookingService {
     private JwtService jwtService; // ✅ added
 
     @Transactional
-    public Booking createBooking(Long carId, Booking bookingDetails, HttpServletRequest request) {
+    public BookingDTO createBooking(Long carId, Booking bookingDetails, HttpServletRequest request) {
 
         // ✅ Extract token
         String authHeader = request.getHeader("Authorization");
@@ -61,11 +64,12 @@ public class BookingService {
         bookingDetails.setUserId(userId);
 
         carRepository.save(car);
-        return bookingRepository.save(bookingDetails);
+        Booking savedBooking = bookingRepository.save(bookingDetails);
+        return mapToDTO(savedBooking);
     }
 
     @Transactional
-    public Booking approveBooking(Long bookingId) {
+    public BookingDTO approveBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
                 
@@ -73,12 +77,12 @@ public class BookingService {
             throw new RuntimeException("Only REQUESTED bookings can be approved. Current status: " + booking.getStatus());
         }
         
-        booking.setStatus("CONFIRMED");
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+        return mapToDTO(savedBooking);
     }
 
     @Transactional
-    public Booking rejectBooking(Long bookingId) {
+    public BookingDTO rejectBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
                 
@@ -93,13 +97,16 @@ public class BookingService {
         car.setAvailable(true);
         carRepository.save(car);
         
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+        return mapToDTO(savedBooking);
     }
 
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+    public List<BookingDTO> getAllBookings() {
+        return bookingRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
-    public List<Booking> getBookingsForUser(HttpServletRequest request) {
+    public List<BookingDTO> getBookingsForUser(HttpServletRequest request) {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -111,6 +118,29 @@ public class BookingService {
 
         Long userId = jwtService.extractUserId(token);
 
-        return bookingRepository.findByUserId(userId);
+        return bookingRepository.findByUserId(userId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private BookingDTO mapToDTO(Booking booking) {
+        BookingDTO dto = new BookingDTO();
+        dto.setId(booking.getId());
+        dto.setUserId(booking.getUserId());
+        dto.setFullName(booking.getFullName());
+        dto.setEmail(booking.getEmail());
+        dto.setPhoneNumber(booking.getPhoneNumber());
+        dto.setStartDate(booking.getStartDate());
+        dto.setEndDate(booking.getEndDate());
+        dto.setTotalPrice(booking.getTotalPrice());
+        dto.setStatus(booking.getStatus());
+
+        if (booking.getCar() != null) {
+            CarDTO carDTO = new CarDTO();
+            carDTO.setId(booking.getCar().getId());
+            carDTO.setName(booking.getCar().getName());
+            dto.setCar(carDTO);
+        }
+        return dto;
     }
 }
