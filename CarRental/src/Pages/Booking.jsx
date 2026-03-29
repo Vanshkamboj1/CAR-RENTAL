@@ -90,6 +90,12 @@ const Booking = () => {
       return;
     }
 
+    const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    if (documents.aadharCard.size > MAX_FILE_SIZE || documents.drivingLicense.size > MAX_FILE_SIZE) {
+      setMessage({ text: 'Each document must be 2MB or smaller.', type: 'error' });
+      return;
+    }
+
     setIsUploading(true);
     let aadharUrl = '';
     let drivingLicenseUrl = '';
@@ -276,7 +282,9 @@ const Booking = () => {
         />
 
         {/* ✅ Documents Upload */}
-        <label className="block mb-1 font-medium">Aadhar Card</label>
+        <label className="block mb-1 font-medium">
+          Aadhar Card <span className="text-sm font-normal text-gray-500">(Max 2MB)</span>
+        </label>
         <input
           id="aadharCardInput"
           type="file"
@@ -287,7 +295,9 @@ const Booking = () => {
           required
         />
 
-        <label className="block mb-1 font-medium">Driving License</label>
+        <label className="block mb-1 font-medium">
+          Driving License <span className="text-sm font-normal text-gray-500">(Max 2MB)</span>
+        </label>
         <input
           id="drivingLicenseInput"
           type="file"

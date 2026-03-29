@@ -42,7 +42,7 @@ function AdminNavbar() {
             to="/admin/makeavailable"
             className="px-4 py-2 bg-white text-black rounded-lg shadow-md border border-gray-200 hover:shadow-lg hover:bg-gray-100 transition-all duration-200"
           >
-            Make Available
+            Manage
           </Link>
 
         </div>

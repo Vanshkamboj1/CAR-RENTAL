@@ -2,7 +2,7 @@ import React from "react";
 
 function LayoutBox({ children, background }) {
   return (
-    <div className="pt-24 pb-10 bg-gray-100">
+    <div className="pt-32 pb-16 bg-gray-100 ">
 
       <div
         style={
