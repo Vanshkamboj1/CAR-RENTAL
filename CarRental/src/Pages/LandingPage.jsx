@@ -52,12 +52,12 @@ function LandingPage() {
 
   return (
     <LayoutBox background={Background}>
-
+      
       {/* Wrapper */}
       <div className="space-y-6">
 
         {/* 🔥 Slogan Box */}
-        <div className="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl">
+        <div className="max-w-6xl mx-auto bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl">
           <h1 className="text-2xl md:text-3xl font-semibold text-black/80 text-center leading-snug">
             Experience the Road Like Never Before – Premium Cars, Seamless Booking,
             and Unmatched Comfort at Your Fingertips.
@@ -65,7 +65,7 @@ function LandingPage() {
         </div>
 
         {/* 🔥 Title Box */}
-        <div className="bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-gray-200 text-center">
+        <div className="max-w-3xl mx-auto bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-gray-200 text-center">
           <h4 className="text-2xl font-bold text-black/80 mb-2">
             Cars Available Throughout India
           </h4>
@@ -82,7 +82,7 @@ function LandingPage() {
 
       {/* Slider Buttons */}
       {!loading && !error && cars.length > initialCars && (
-        <div className="flex justify-end mt-6 mb-4 gap-2">
+        <div className="flex justify-end mt-6 mb-4 gap-2 max-w-6xl mx-auto">
           <button
             onClick={prev}
             disabled={currentIndex === 0}
@@ -101,11 +101,11 @@ function LandingPage() {
       )}
 
       {/* Car Cards */}
-      <div className="flex flex-wrap justify-center gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 max-w-6xl mx-auto">
         {!loading &&
           !error &&
           visibleCars.map((car) => (
-            <AdminCarCard key={car.id} car={car} className="w-48" />
+            <AdminCarCard key={car.id} car={car} />
           ))}
       </div>
 
