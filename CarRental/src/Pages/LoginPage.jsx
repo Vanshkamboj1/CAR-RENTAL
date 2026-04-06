@@ -43,7 +43,7 @@ const LoginPage = () => {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
+      className="flex items-center justify-center min-h-screen bg-cover bg-center relative"
       style={{ backgroundImage: `url(${Background})` }}
     >
 
@@ -107,6 +107,14 @@ const LoginPage = () => {
           </Link>
         </p>
 
+      </div>
+
+      {/* 🔥 Render Info Box */}
+      <div className="absolute bottom-4 right-4 bg-white/70 backdrop-blur-md px-4 py-3 rounded-xl shadow-lg border border-gray-200 max-w-xs">
+        <p className="text-xs text-gray-700 leading-relaxed text-center">
+          This site is deployed on Render. The first response may be delayed —
+          please wait 2–3 minutes if the server is waking up.
+        </p>
       </div>
 
     </div>

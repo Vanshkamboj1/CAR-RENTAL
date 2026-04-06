@@ -53,28 +53,36 @@ function LandingPage() {
   return (
     <LayoutBox background={Background}>
 
-      {/* Slogan */}
-      <div className="p-3 rounded-xl mx-auto mb-4">
-        <h1 className="text-4xl font-semibold text-black/70 text-center drop-shadow-md leading-snug">
-          Experience the Road Like Never Before – Premium Cars, Seamless Booking, and Unmatched Comfort at Your Fingertips.
-        </h1>
+      {/* Wrapper */}
+      <div className="space-y-6">
+
+        {/* 🔥 Slogan Box */}
+        <div className="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl">
+          <h1 className="text-2xl md:text-3xl font-semibold text-black/80 text-center leading-snug">
+            Experience the Road Like Never Before – Premium Cars, Seamless Booking,
+            and Unmatched Comfort at Your Fingertips.
+          </h1>
+        </div>
+
+        {/* 🔥 Title Box */}
+        <div className="bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-gray-200 text-center">
+          <h4 className="text-2xl font-bold text-black/80 mb-2">
+            Cars Available Throughout India
+          </h4>
+          <p className="text-sm text-gray-600">
+            Book at least 1 week in advance for guaranteed availability.
+          </p>
+        </div>
+
       </div>
 
-      {/* Title */}
-      <h4 className="text-3xl font-bold text-center mb-1 text-black/70 mt-10">
-        Cars Available Throughout India
-      </h4>
-      <p className="text-sm text-center text-black mb-4 drop-shadow-md">
-        Book at least 1 week in advance for guaranteed availability.
-      </p>
-
       {/* Loading / Error */}
-      {loading && <p className="text-center text-gray-700">Loading cars...</p>}
-      {error && <p className="text-center text-red-500">{error}</p>}
+      {loading && <p className="text-center text-gray-700 mt-6">Loading cars...</p>}
+      {error && <p className="text-center text-red-500 mt-6">{error}</p>}
 
       {/* Slider Buttons */}
       {!loading && !error && cars.length > initialCars && (
-        <div className="flex justify-end mb-4 gap-2">
+        <div className="flex justify-end mt-6 mb-4 gap-2">
           <button
             onClick={prev}
             disabled={currentIndex === 0}
@@ -103,7 +111,7 @@ function LandingPage() {
 
       {/* No Cars */}
       {!loading && !error && cars.length === 0 && (
-        <p className="text-center text-gray-600">
+        <p className="text-center text-gray-600 mt-6">
           No cars available in India right now.
         </p>
       )}
