@@ -4,8 +4,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 @Entity
+@Table(name = "car", indexes = {
+    @Index(name = "idx_car_available", columnList = "available"),
+    @Index(name = "idx_car_location", columnList = "location")
+})
 public class Car {
 
     @Id

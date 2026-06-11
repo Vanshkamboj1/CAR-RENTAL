@@ -27,4 +27,15 @@ public class CarController {
     public List<Car> getAvailableCarsByLocation(@RequestParam String location) {
         return carService.getAvailableCarsByLocation(location);
     }
+
+    // NEW: Check if a car is available for specific dates
+    @GetMapping("/{carId}/availability")
+    public boolean checkAvailability(
+            @PathVariable Long carId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        java.time.LocalDate start = java.time.LocalDate.parse(startDate);
+        java.time.LocalDate end = java.time.LocalDate.parse(endDate);
+        return carService.isCarAvailableForDates(carId, start, end);
+    }
 }

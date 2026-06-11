@@ -25,6 +25,9 @@ const Booking = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
+  const [isAvailable, setIsAvailable] = useState(null);
+  const [isChecking, setIsChecking] = useState(false);
+
   const token = localStorage.getItem('authToken');
 
   useEffect(() => {
@@ -57,6 +60,48 @@ const Booking = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'startDate' || e.target.name === 'endDate') {
+      setIsAvailable(null);
+    }
+  };
+
+  const handleCheckAvailability = async () => {
+    setMessage({ text: '', type: '' });
+    
+    if (!formData.startDate || !formData.endDate) {
+      setMessage({ text: 'Please select both dates first.', type: 'error' });
+      return;
+    }
+    
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+    
+    if (end < start) {
+      setMessage({ text: 'End date cannot be before start.', type: 'error' });
+      return;
+    }
+
+    setIsChecking(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cars/${car.id}/availability?startDate=${formData.startDate}&endDate=${formData.endDate}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const available = await response.json();
+        setIsAvailable(available);
+        if (available) {
+          setMessage({ text: '✅ Car is available! Please fill out the remaining details.', type: 'success' });
+        } else {
+          setMessage({ text: '❌ Car is already booked for the selected dates.', type: 'error' });
+        }
+      } else {
+        setMessage({ text: '⚠️ Failed to check availability.', type: 'error' });
+      }
+    } catch (err) {
+      setMessage({ text: '⚠️ Connection error.', type: 'error' });
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -231,36 +276,6 @@ const Booking = () => {
           <p><strong>Price/day:</strong> ₹{car.price}</p>
         </div>
 
-        <input
-          type="text"
-          name="fullName"
-          placeholder="Full Name"
-          value={formData.fullName}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
-          required
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
-          required
-        />
-
-        <input
-          type="tel"
-          name="phoneNumber"
-          placeholder="Phone Number"
-          value={formData.phoneNumber}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
-          required
-        />
-
         <label className="block mb-1 font-medium">Start Date</label>
         <input
           type="date"
@@ -281,47 +296,94 @@ const Booking = () => {
           required
         />
 
-        {/* ✅ Documents Upload */}
-        <label className="block mb-1 font-medium">
-          Aadhar Card <span className="text-sm font-normal text-gray-500">(Max 2MB)</span>
-        </label>
-        <input
-          id="aadharCardInput"
-          type="file"
-          name="aadharCard"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="w-full p-2 mb-3 border rounded text-sm text-gray-700 bg-white"
-          required
-        />
+        {isAvailable !== true && (
+          <button
+            type="button"
+            onClick={handleCheckAvailability}
+            disabled={isChecking}
+            className={`w-full py-2 mb-4 rounded-lg transition text-white ${
+              isChecking ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+            }`}
+          >
+            {isChecking ? 'Checking...' : 'Check Availability'}
+          </button>
+        )}
 
-        <label className="block mb-1 font-medium">
-          Driving License <span className="text-sm font-normal text-gray-500">(Max 2MB)</span>
-        </label>
-        <input
-          id="drivingLicenseInput"
-          type="file"
-          name="drivingLicense"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="w-full p-2 mb-5 border rounded text-sm text-gray-700 bg-white"
-          required
-        />
+        {isAvailable === true && (
+          <>
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              value={formData.fullName}
+              onChange={handleChange}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
 
-        <div className="flex justify-between mb-5 text-lg font-semibold">
-          <span>Total Price:</span>
-          <span className="text-green-600">₹{totalPrice}</span>
-        </div>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
 
-        <button
-          type="submit"
-          disabled={isUploading}
-          className={`w-full py-2 rounded-lg transition text-white ${
-            isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'
-          }`}
-        >
-          {isUploading ? 'Uploading & Confirming...' : 'Confirm Booking'}
-        </button>
+            <input
+              type="tel"
+              name="phoneNumber"
+              placeholder="Phone Number"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+
+            {/* ✅ Documents Upload */}
+            <label className="block mb-1 font-medium">
+              Aadhar Card <span className="text-sm font-normal text-gray-500">(Max 2MB)</span>
+            </label>
+            <input
+              id="aadharCardInput"
+              type="file"
+              name="aadharCard"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 mb-3 border rounded text-sm text-gray-700 bg-white"
+              required
+            />
+
+            <label className="block mb-1 font-medium">
+              Driving License <span className="text-sm font-normal text-gray-500">(Max 2MB)</span>
+            </label>
+            <input
+              id="drivingLicenseInput"
+              type="file"
+              name="drivingLicense"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 mb-5 border rounded text-sm text-gray-700 bg-white"
+              required
+            />
+
+            <div className="flex justify-between mb-5 text-lg font-semibold">
+              <span>Total Price:</span>
+              <span className="text-green-600">₹{totalPrice}</span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isUploading}
+              className={`w-full py-2 rounded-lg transition text-white ${
+                isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'
+              }`}
+            >
+              {isUploading ? 'Uploading & Confirming...' : 'Confirm Booking'}
+            </button>
+          </>
+        )}
       </form>
 
     </LayoutBox>

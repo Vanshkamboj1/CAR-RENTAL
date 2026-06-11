@@ -4,14 +4,17 @@ import com.carrental.car.model.Booking;
 import com.carrental.car.dto.BookingDTO;
 import com.carrental.car.dto.CarDTO;
 import com.carrental.car.model.Car;
+import com.carrental.car.model.User;
 import com.carrental.car.repository.BookingRepository;
 import com.carrental.car.repository.CarRepository;
+import com.carrental.car.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,9 @@ public class BookingService {
     @Autowired
     private JwtService jwtService; // ✅ added
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional
     public BookingDTO createBooking(Long carId, Booking bookingDetails, HttpServletRequest request) {
 
@@ -36,12 +42,27 @@ public class BookingService {
 
 
         Long userId = jwtService.extractUserId(token);
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new RuntimeException("Car not found with id: " + carId));
 
         if (!car.isAvailable()) {
-            throw new RuntimeException("Car is not available for booking");
+            throw new RuntimeException("Car is currently inactive and cannot be booked.");
+        }
+
+        long overlaps = bookingRepository.countOverlappingBookings(
+                carId,
+                bookingDetails.getStartDate(),
+                bookingDetails.getEndDate(),
+                Arrays.asList("APPROVED", "CONFIRMED", "REQUESTED"),
+                null
+        );
+
+        if (overlaps > 0) {
+            throw new RuntimeException("Car is already booked for the selected dates.");
         }
 
         long numberOfDays = ChronoUnit.DAYS.between(
@@ -57,13 +78,11 @@ public class BookingService {
 
         double totalPrice = numberOfDays * car.getPrice();
 
-        car.setAvailable(false);
         bookingDetails.setCar(car);
         bookingDetails.setTotalPrice(totalPrice);
         bookingDetails.setStatus("REQUESTED");
-        bookingDetails.setUserId(userId);
+        bookingDetails.setUser(user);
 
-        carRepository.save(car);
         Booking savedBooking = bookingRepository.save(bookingDetails);
         return mapToDTO(savedBooking);
     }
@@ -75,6 +94,20 @@ public class BookingService {
                 
         if (!"REQUESTED".equals(booking.getStatus())) {
             throw new RuntimeException("Only REQUESTED bookings can be approved. Current status: " + booking.getStatus());
+        }
+
+        long overlaps = bookingRepository.countOverlappingBookings(
+                booking.getCar().getId(),
+                booking.getStartDate(),
+                booking.getEndDate(),
+                Arrays.asList("APPROVED", "CONFIRMED", "REQUESTED"),
+                booking.getId()
+        );
+
+        if (overlaps > 0) {
+            booking.setStatus("REJECTED");
+            bookingRepository.save(booking);
+            throw new RuntimeException("Cannot approve. Car is already booked for these dates.");
         }
         
         booking.setStatus("APPROVED");
@@ -93,11 +126,6 @@ public class BookingService {
         }
         
         booking.setStatus("REJECTED");
-        
-        // Free up the car since the booking was denied
-        Car car = booking.getCar();
-        car.setAvailable(true);
-        carRepository.save(car);
         
         Booking savedBooking = bookingRepository.save(booking);
         return mapToDTO(savedBooking);
@@ -128,9 +156,13 @@ public class BookingService {
     private BookingDTO mapToDTO(Booking booking) {
         BookingDTO dto = new BookingDTO();
         dto.setId(booking.getId());
-        dto.setUserId(booking.getUserId());
-        dto.setFullName(booking.getFullName());
-        dto.setEmail(booking.getEmail());
+        
+        if (booking.getUser() != null) {
+            dto.setUserId(booking.getUser().getId());
+            dto.setFullName(booking.getUser().getFullName());
+            dto.setEmail(booking.getUser().getEmail());
+        }
+        
         dto.setPhoneNumber(booking.getPhoneNumber());
         dto.setStartDate(booking.getStartDate());
         dto.setEndDate(booking.getEndDate());

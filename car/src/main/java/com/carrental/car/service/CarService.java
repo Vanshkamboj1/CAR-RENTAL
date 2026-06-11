@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Import Transactional
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,20 +40,35 @@ public class CarService {
         return carRepository.save(car);
     }
 
+    public boolean isCarAvailableForDates(Long carId, LocalDate startDate, LocalDate endDate) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found"));
+        
+        if (!car.isAvailable()) {
+            return false;
+        }
+
+        long overlaps = bookingRepository.countOverlappingBookings(
+                carId, startDate, endDate, Arrays.asList("APPROVED", "CONFIRMED", "REQUESTED"), null
+        );
+        
+        return overlaps == 0;
+    }
+
     // --- THIS METHOD IS UPDATED ---
     /**
      * Makes a car available again AND completes the associated booking.
      * @param carId The ID of the car to make available.
      * @return The updated Car object.
      */
-    @Transactional // Ensures both car and booking are updated
+    @Transactional // Ensures booking is updated
     public Car makeCarAvailable(Long carId) {
         // 1. Find the car
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new RuntimeException("Car not found with id: " + carId));
 
-        // 2. Update car status
-        car.setAvailable(true);
+        // Note: We no longer toggle car.setAvailable(true/false) per booking.
+        // It remains true unless globally deactivated.
 
         // 3. Find and update the booking
         // This finds the most recent booking for this car that is "CONFIRMED" or "APPROVED"
