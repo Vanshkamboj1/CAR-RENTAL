@@ -15,6 +15,7 @@ import Cart from './Pages/Cart';
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 import ANavbar from './Components/ANavnbar';
+import ChatBot from './Components/ChatBot';
 
 /* -------- Protected Route -------- */
 
@@ -40,6 +41,7 @@ const UserLayout = () => (
     <Navbar />
     <Outlet />
     <Footer />
+    <ChatBot />
   </>
 );
 

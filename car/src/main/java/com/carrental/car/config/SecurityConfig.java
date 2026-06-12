@@ -49,6 +49,7 @@ public class SecurityConfig {
                         // ✅ Public APIs
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/cars/available/**").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll()
 
                         // ✅ Role-based access
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
