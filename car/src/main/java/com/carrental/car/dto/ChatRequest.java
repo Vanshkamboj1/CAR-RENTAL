@@ -4,6 +4,7 @@ import java.util.List;
 
 public class ChatRequest {
     private String message;
+    private String sessionId;
     private List<ChatMessageDto> history;
 
     public String getMessage() {
@@ -12,6 +13,14 @@ public class ChatRequest {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public List<ChatMessageDto> getHistory() {

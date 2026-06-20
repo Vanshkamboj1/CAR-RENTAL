@@ -18,7 +18,7 @@ public class ChatController {
 
     @PostMapping
     public ResponseEntity<Map<String, String>> chat(@RequestBody ChatRequest request) {
-        String aiResponse = chatService.chat(request.getMessage(), request.getHistory());
+        String aiResponse = chatService.chat(request.getMessage(), request.getSessionId(), request.getHistory());
         
         Map<String, String> response = new HashMap<>();
         response.put("response", aiResponse);

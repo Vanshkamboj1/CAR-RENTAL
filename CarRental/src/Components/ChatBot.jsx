@@ -34,6 +34,7 @@ const ChatBot = () => {
       // Use environment variable for base URL
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, {
         message: userMessage,
+        sessionId: chatId,
         history: messages
       });
       setMessages((prev) => [...prev, { sender: 'bot', text: response.data.response }]);

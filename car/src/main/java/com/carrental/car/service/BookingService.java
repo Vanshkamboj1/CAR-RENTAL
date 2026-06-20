@@ -12,8 +12,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +36,9 @@ public class BookingService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     @Transactional
     public BookingDTO createBooking(Long carId, Booking bookingDetails, HttpServletRequest request) {
@@ -53,18 +60,6 @@ public class BookingService {
             throw new RuntimeException("Car is currently inactive and cannot be booked.");
         }
 
-        long overlaps = bookingRepository.countOverlappingBookings(
-                carId,
-                bookingDetails.getStartDate(),
-                bookingDetails.getEndDate(),
-                Arrays.asList("APPROVED", "CONFIRMED", "REQUESTED"),
-                null
-        );
-
-        if (overlaps > 0) {
-            throw new RuntimeException("Car is already booked for the selected dates.");
-        }
-
         long numberOfDays = ChronoUnit.DAYS.between(
                 bookingDetails.getStartDate(),
                 bookingDetails.getEndDate()
@@ -83,8 +78,38 @@ public class BookingService {
         bookingDetails.setStatus("REQUESTED");
         bookingDetails.setUser(user);
 
-        Booking savedBooking = bookingRepository.save(bookingDetails);
-        return mapToDTO(savedBooking);
+        String lockKey = "booking:lock:car:" + carId;
+        RLock lock = redissonClient.getLock(lockKey);
+        
+        try {
+            // Wait up to 5 seconds to acquire lock, hold for up to 10 seconds
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
+                
+                long overlaps = bookingRepository.countOverlappingBookings(
+                        carId,
+                        bookingDetails.getStartDate(),
+                        bookingDetails.getEndDate(),
+                        Arrays.asList("APPROVED", "CONFIRMED", "REQUESTED"),
+                        null
+                );
+
+                if (overlaps > 0) {
+                    throw new RuntimeException("Car is already booked for the selected dates.");
+                }
+                
+                Booking savedBooking = bookingRepository.save(bookingDetails);
+                return mapToDTO(savedBooking);
+            } else {
+                throw new RuntimeException("Car is currently being booked by someone else. Please try again in a few seconds.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Booking process was interrupted.");
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     @Transactional

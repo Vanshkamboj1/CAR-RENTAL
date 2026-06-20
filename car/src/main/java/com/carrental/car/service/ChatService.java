@@ -8,28 +8,49 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ChatService {
 
     private final ChatClient chatClient;
     private final CarService carService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public ChatService(ChatClient.Builder chatClientBuilder, CarService carService) {
+    public ChatService(ChatClient.Builder chatClientBuilder, CarService carService, RedisTemplate<String, Object> redisTemplate) {
         this.chatClient = chatClientBuilder.build();
         this.carService = carService;
+        this.redisTemplate = redisTemplate;
     }
 
-    public String chat(String userMessage, List<ChatMessageDto> history) {
-        // Fetch available cars to provide context
-        List<Car> availableCars = carService.getAvailableCars();
+    public String chat(String userMessage, String sessionId, List<ChatMessageDto> history) {
+        String sessionKey = sessionId != null ? sessionId : "default";
+        String redisLocationKey = "chat:location:" + sessionKey;
+        
+        // Fetch location from Redis
+        String userLocation = (String) redisTemplate.opsForValue().get(redisLocationKey);
+        
+        List<Car> availableCars;
+        if (userLocation != null && !userLocation.trim().isEmpty()) {
+            availableCars = carService.getAvailableCarsByLocation(userLocation);
+        } else {
+            availableCars = carService.getAvailableCars(); // fallback
+        }
 
         // Build a context string
-        String carContext = "Currently available cars for rent:\n";
+        String carContext = "Currently available cars for rent";
+        if (userLocation != null && !userLocation.trim().isEmpty()) {
+            carContext += " in " + userLocation;
+        }
+        carContext += ":\n";
+
         if (availableCars.isEmpty()) {
             carContext += "No cars are currently available.\n";
         } else {
@@ -45,8 +66,9 @@ public class ChatService {
                 carContext + "\n\n" +
                 "IMPORTANT RULES:\n" +
                 "1. If the user has not mentioned their city or location, politely ask them for their location first so you can recommend cars available near them.\n" +
-                "2. If the user asks for a car not in the inventory, politely inform them that it is currently not available, but suggest the closest alternative.\n" +
-                "3. You CANNOT make bookings, take dates, or process payments. Once the user selects a final car, praise their choice (e.g. 'Great choice!') and explicitly tell them to navigate to the 'Book Now' section in the top menu to complete their booking.\n" +
+                "2. If you identify the user's city or location based on the chat, you MUST output a tag <location>CITY_NAME</location> exactly once in your response (e.g. <location>Delhi</location>).\n" +
+                "3. If the user asks for a car not in the inventory, politely inform them that it is currently not available, but suggest the closest alternative.\n" +
+                "4. You CANNOT make bookings, take dates, or process payments. Once the user selects a final car, praise their choice (e.g. 'Great choice!') and explicitly tell them to navigate to the 'Book Now' section in the top menu to complete their booking.\n" +
                 "Keep responses concise, friendly, and structured. Format prices clearly using Markdown.";
 
         List<Message> springAiMessages = new ArrayList<>();
@@ -68,9 +90,23 @@ public class ChatService {
         springAiMessages.add(new UserMessage(userMessage));
 
         // Call the AI model
-        return this.chatClient.prompt()
+        String responseContent = this.chatClient.prompt()
                 .messages(springAiMessages)
                 .call()
                 .content();
+
+        // Extract <location> tags
+        Pattern pattern = Pattern.compile("<location>(.*?)</location>", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(responseContent);
+        if (matcher.find()) {
+            String extractedLocation = matcher.group(1).trim();
+            // Save to Redis with 1 hour expiration
+            redisTemplate.opsForValue().set(redisLocationKey, extractedLocation, 1, TimeUnit.HOURS);
+            
+            // Remove the tag from the user-facing response
+            responseContent = responseContent.replaceAll("(?i)<location>.*?</location>", "").trim();
+        }
+
+        return responseContent;
     }
 }

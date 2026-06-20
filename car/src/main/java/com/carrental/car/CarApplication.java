@@ -18,6 +18,7 @@ public class CarApplication {
 		setIfPresent("CLOUDINARY_URL", dotenv);
 		setIfPresent("CORS_ALLOWED_ORIGINS", dotenv);
 		setIfPresent("OPENROUTER_API_KEY", dotenv);
+		setIfPresent("REDIS_URL", dotenv);
 
 		SpringApplication.run(CarApplication.class, args);
 	}
